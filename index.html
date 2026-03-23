@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>BatDashboard APIs</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+<script async src="https://platform.twitter.com/widgets.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family: 'Orbitron', sans-serif;
+    background:#0a0f1c;
+    color:#00f7ff;
+}
+
+header{
+    background: linear-gradient(90deg, #000428, #004e92);
+    padding:20px;
+    text-align:center;
+    border-bottom:2px solid #00f7ff;
+}
+
+.container{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+    gap:20px;
+    padding:20px;
+}
+
+.card{
+    background: rgba(0,0,0,0.7);
+    border:1px solid #00f7ff;
+    border-radius:12px;
+    padding:15px;
+    box-shadow: 0 0 15px #00f7ff44;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:scale(1.02);
+    box-shadow: 0 0 25px #00f7ff;
+}
+
+.card h3{
+    margin-top:0;
+    border-bottom:1px solid #00f7ff;
+    padding-bottom:5px;
+}
+
+#map{
+    height:250px;
+    border-radius:8px;
+}
+
+input{
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+    border:none;
+    border-radius:5px;
+    background:#111;
+    color:#00f7ff;
+}
+
+button{
+    width:100%;
+    padding:8px;
+    margin-top:8px;
+    border:none;
+    border-radius:5px;
+    background:#00f7ff;
+    color:#000;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#00c3cc;
+}
+
+/* TABLA */
+table{
+    width:100%;
+    margin-top:10px;
+    border-collapse:collapse;
+    font-size:12px;
+}
+th, td{
+    border:1px solid #00f7ff;
+    padding:5px;
+    text-align:center;
+}
+
+/* ANIMACIÓN SCAN */
+@keyframes scan {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+
+iframe{
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🦇 BAT-DASHBOARD v1.0</h1>
+</header>
+
+<div class="container">
+
+<!-- GEO -->
+<div class="card">
+<h3>🌍 GEOLOCALIZACIÓN</h3>
+<div id="map"></div>
+</div>
+
+<!-- REDES -->
+<div class="card">
+<h3>📡 RED SOCIAL</h3>
+<iframe style="width:100%; height:350px;" src="https://nitter.net/Lepfoz256"></iframe>
+</div>
+
+<!-- ECOMMERCE -->
+<div class="card">
+<h3>🛒 PRODUCT SCAN</h3>
+<input id="busqueda" placeholder="Buscar producto...">
+<button onclick="buscarMercadoLibre()">Buscar</button>
+<div id="producto"></div>
+</div>
+
+<!-- DB LOCAL -->
+<div class="card">
+<h3>☁️ DATA UPLOAD</h3>
+
+<input id="nombre" placeholder="Nombre">
+<input id="edad" type="number" placeholder="Edad">
+
+<button onclick="guardarUsuario()">Agregar</button>
+
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Edad</th>
+</tr>
+</thead>
+<tbody id="tablaUsuarios"></tbody>
+</table>
+
+</div>
+
+<!-- SMS -->
+<div class="card">
+<h3>📩 COMUNICACIÓN</h3>
+<input id="tel" placeholder="521XXXXXXXXXX">
+<button onclick="enviarSMS()">Transmitir</button>
+<p id="sms"></p>
+</div>
+
+<!-- STREAM -->
+<div class="card">
+<h3>🎬 VISUAL FEED</h3>
+<iframe width="100%" height="200"
+src="https://www.youtube.com/embed/DDtB8eh96u4"
+allowfullscreen></iframe>
+</div>
+
+</div>
+
+<script>
+
+/* 🛰️ PRODUCT SCAN ESTILO BATCOMPUTER */
+function buscarMercadoLibre(){
+    let producto = document.getElementById("busqueda").value.trim();
+    let contenedor = document.getElementById("producto");
+
+    if(!producto){
+        contenedor.innerHTML = "<p style='color:#ff6b6b;'>⚠️ Escribe un producto</p>";
+        return;
+    }
+
+    let url = "https://listado.mercadolibre.com.mx/" + encodeURIComponent(producto);
+
+    contenedor.innerHTML = `
+    <div style="text-align:center; padding:10px;">
+        <p>🛰️ Escaneando mercado...</p>
+        <div style="
+            width:100%;
+            height:5px;
+            background:#111;
+            margin:10px 0;
+            overflow:hidden;
+            border-radius:5px;">
+            <div style="
+                width:50%;
+                height:100%;
+                background:#00f7ff;
+                animation: scan 1s infinite;">
+            </div>
+        </div>
+    </div>
+    `;
+
+    setTimeout(() => {
+        contenedor.innerHTML = `
+        <div style="
+            text-align:center;
+            padding:15px;
+            border:1px solid #00f7ff;
+            border-radius:10px;
+            box-shadow:0 0 15px #00f7ff;">
+            
+            <p>🔍 Resultado encontrado</p>
+            <p><strong>${producto}</strong></p>
+
+            <a href="${url}" target="_blank" style="
+                display:inline-block;
+                margin-top:10px;
+                padding:10px 15px;
+                background:#00f7ff;
+                color:#000;
+                border-radius:5px;
+                text-decoration:none;
+                font-weight:bold;">
+                Ir a Mercado Libre →
+            </a>
+
+        </div>
+        `;
+    }, 1000);
+}
+
+/* BASE LOCAL */
+let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+function renderTabla(){
+let tabla = document.getElementById("tablaUsuarios");
+tabla.innerHTML = "";
+
+usuarios.forEach(u => {
+tabla.innerHTML += `
+<tr>
+<td>${u.nombre}</td>
+<td>${u.edad}</td>
+</tr>
+`;
+});
+}
+
+function guardarUsuario(){
+let nombre = document.getElementById("nombre").value.trim();
+let edad = document.getElementById("edad").value.trim();
+
+if(!nombre || !edad){
+alert("Completa todos los campos");
+return;
+}
+
+usuarios.push({nombre, edad});
+
+localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+renderTabla();
+
+document.getElementById("nombre").value="";
+document.getElementById("edad").value="";
+}
+
+/* SMS */
+function enviarSMS(){
+let telefono = document.getElementById("tel").value;
+let url = "https://wa.me/" + telefono + "?text=Mensaje%20desde%20BatDashboard";
+window.open(url, "_blank");
+}
+
+renderTabla();
+
+</script>
+
+<script src="js/geolocalizacion.js"></script>
+
+</body>
+</html>
